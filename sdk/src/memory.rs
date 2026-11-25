@@ -21,8 +21,12 @@ fn purge_native_heap() {
     const M_PURGE: libc::c_int = -101;
     unsafe extern "C" {
         fn mallopt(param: libc::c_int, value: libc::c_int) -> libc::c_int;
+        fn android_get_device_api_level() -> libc::c_int;
     }
     // SAFETY: M_PURGE asks scudo to release cached free pages; it touches no live allocation.
+    if android_get_device_api_level() < 30 {
+            return;
+    }
     unsafe {
         mallopt(M_PURGE, 0);
     }
